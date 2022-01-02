@@ -1,5 +1,6 @@
 $(window).on('load', function () {
     $("#register").on('click', () => registerButtonClicked());
+    $("#fido").on('click', () => fido());
 });
 
 const abortController = new AbortController();
@@ -26,6 +27,50 @@ function registerButtonClicked() {
         });
 }
 
+/**
+ * fido
+ */
+function fido() {
+    let username  = $("input[name='username']").val();
+
+    let serverPublicKeyCredentialGetOptionsRequest = {
+        username: username,
+    };
+
+    getCredentialsCount(username)
+        .then(count => {
+            if( count > 0) {
+                getAuthChallenge(serverPublicKeyCredentialGetOptionsRequest)
+                    .then(getCredentialOptions => {
+                        return getAssertion(getCredentialOptions);
+                    })
+                    .then(assertion => {
+                        $("#assertion").val(JSON.stringify(assertion));
+                        document.authenticate.submit();
+                        return;
+                    })
+            } else {
+                document.authenticate.submit();
+                return;
+            }
+        })
+        .catch(e => {
+            $("#status").text("Error: " + e);
+        });
+}
+
+function getCredentialsCount(username) {
+    var url = `/credentials/count?username=${username}`;
+    return rest_get(url)
+        .then(response => {
+            if (response.status !== 'ok') {
+                return Promise.reject(response.errorMessage);
+            } else {
+                return Promise.resolve(response.count);
+            }
+        });
+}
+
 function getRegChallenge(serverPublicKeyCredentialCreationOptionsRequest) {
     logObject("Get reg challenge", serverPublicKeyCredentialCreationOptionsRequest);
     return rest_post("/register/option", serverPublicKeyCredentialCreationOptionsRequest)
@@ -37,6 +82,30 @@ function getRegChallenge(serverPublicKeyCredentialCreationOptionsRequest) {
                 let createCredentialOptions = performMakeCredReq(response);
                 return Promise.resolve(createCredentialOptions);
             }
+        });
+}
+
+function getAuthChallenge(serverPublicKeyCredentialGetOptionsRequest) {
+    logObject("Get auth challenge", serverPublicKeyCredentialGetOptionsRequest);
+    return rest_post("/authenticate/option", serverPublicKeyCredentialGetOptionsRequest)
+        .then(response => {
+            logObject("Get auth challenge", response);
+            if (response.status !== 'ok') {
+                return Promise.reject(response.errorMessage);
+            } else {
+                let getCredentialOptions = performGetCredReq(response);
+                return Promise.resolve(getCredentialOptions);
+            }
+        });
+}
+
+function rest_get(endpoint) {
+    return fetch(endpoint, {
+            method: "GET",
+            credentials: "same-origin"
+        })
+        .then(response => {
+            return response.json();
         });
 }
 
@@ -172,5 +241,71 @@ function createCredential(options) {
             } else {
                 return Promise.resolve(response);
             }
+        });
+}
+
+let performGetCredReq = (getCredReq) => {
+    getCredReq.challenge = base64UrlDecode(getCredReq.challenge);
+
+    //Base64url decoding of id in allowCredentials
+    if (getCredReq.allowCredentials instanceof Array) {
+        for (let i of getCredReq.allowCredentials) {
+            if ('id' in i) {
+                i.id = base64UrlDecode(i.id);
+            }
+        }
+    }
+
+    delete getCredReq.status;
+    delete getCredReq.errorMessage;
+
+    removeEmpty(getCredReq);
+
+    logObject("Updating credentials ", getCredReq)
+    return getCredReq;
+}
+
+function getAssertion(options) {
+    if (!PublicKeyCredential) {
+        return Promise.reject("WebAuthn APIs are not available on this user agent.");
+    }
+
+    return navigator.credentials.get({publicKey: options, signal: abortSignal})
+        .then(rawAssertion => {
+            logObject("raw assertion", rawAssertion);
+
+            let assertion = {
+                rawId: base64UrlEncode(rawAssertion.rawId),
+                id: base64UrlEncode(rawAssertion.rawId),
+                response: {
+                    clientDataJSON: base64UrlEncode(rawAssertion.response.clientDataJSON),
+                    userHandle: base64UrlEncode(rawAssertion.response.userHandle),
+                    signature: base64UrlEncode(rawAssertion.response.signature),
+                    authenticatorData: base64UrlEncode(rawAssertion.response.authenticatorData)
+                },
+                type: rawAssertion.type,
+            };
+
+            if (rawAssertion.getClientExtensionResults) {
+                assertion.extensions = rawAssertion.getClientExtensionResults();
+            }
+
+            console.log("=== Assertion response ===");
+            logVariable("rawId (b64url)", assertion.rawId);
+            logVariable("id (b64url)", assertion.id);
+            logVariable("response.userHandle (b64url)", assertion.response.userHandle);
+            logVariable("response.authenticatorData (b64url)", assertion.response.authenticatorData);
+            logVariable("response.lientDataJSON", assertion.response.clientDataJSON);
+            logVariable("response.signature (b64url)", assertion.response.signature);
+            logVariable("id", assertion.type);
+
+            return Promise.resolve(assertion);
+        })
+        .catch(function(error) {
+            logVariable("get assertion error", error);
+            if (error == "AbortError") {
+                console.info("Aborted by user");
+            }
+            return Promise.reject(error);
         });
 }

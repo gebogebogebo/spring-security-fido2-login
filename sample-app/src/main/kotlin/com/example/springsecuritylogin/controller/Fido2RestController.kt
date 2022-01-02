@@ -5,8 +5,10 @@ import com.example.springsecuritylogin.util.LineFido2Util
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -58,6 +60,35 @@ class Fido2RestController(
             )
         } catch (e: Exception) {
             AdapterServerResponse(Status.FAILED, e.message ?: "")
+        }
+    }
+
+    @PostMapping("/authenticate/option")
+    fun authenticateOption(
+        @RequestBody optionsRequest: ServerPublicKeyCredentialGetOptionsRequest,
+        httpServletResponse: HttpServletResponse
+    ): ServerPublicKeyCredentialGetOptionsResponse {
+        return try {
+            val (serverResponse, sessionId) = lineFido2ServerService.getAuthenticateOption(
+                optionsRequest.username,
+            )
+            LineFido2Util.setFido2SessionId(sessionId, httpServletResponse)
+            serverResponse
+        } catch (e: Exception) {
+            ServerPublicKeyCredentialGetOptionsResponse(Status.FAILED, e.message ?: "")
+        }
+    }
+
+    @GetMapping("/credentials/count")
+    fun credentialsCount(
+        @RequestParam("username") username: String,
+        httpServletRequest: HttpServletRequest
+    ): CredentialsCountResponse {
+        return try {
+            val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(username)
+            CredentialsCountResponse(getCredentialsResult.credentials.count())
+        } catch (e: Exception) {
+            CredentialsCountResponse(Status.FAILED, e.message ?: "")
         }
     }
 }

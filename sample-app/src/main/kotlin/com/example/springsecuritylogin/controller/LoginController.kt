@@ -7,6 +7,8 @@ import org.springframework.security.web.WebAttributes.AUTHENTICATION_EXCEPTION
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
@@ -16,6 +18,14 @@ class LoginController {
     @GetMapping("/")
     fun root(): String {
         return "redirect:mypage"
+    }
+
+    @PostMapping("login-fido2")
+    fun loginFido2(
+        @ModelAttribute("username") username: String,
+        @ModelAttribute("password") password: String,
+    ): String {
+        return "login-fido2"
     }
 
     // 起動時 または 認証失敗時に表示される

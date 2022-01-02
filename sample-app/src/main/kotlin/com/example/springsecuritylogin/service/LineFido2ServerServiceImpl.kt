@@ -2,6 +2,7 @@ package com.example.springsecuritylogin.service
 
 import com.example.springsecuritylogin.controller.AdapterServerResponse
 import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialCreationOptionsResponse
+import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialGetOptionsResponse
 import com.linecorp.line.auth.fido.fido2.common.AttestationConveyancePreference
 import com.linecorp.line.auth.fido.fido2.common.AuthenticatorAttachment
 import com.linecorp.line.auth.fido.fido2.common.AuthenticatorSelectionCriteria
@@ -12,8 +13,10 @@ import com.linecorp.line.auth.fido.fido2.common.extension.CredProtect
 import com.linecorp.line.auth.fido.fido2.common.server.*
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
@@ -27,6 +30,9 @@ class LineFido2ServerServiceImpl(
         private const val ORIGIN = "http://localhost:8080"
         private const val REG_CHALLENGE_URI = "http://localhost:8081/fido2/reg/challenge"
         private const val REG_RESPONSE_URI = "http://localhost:8081/fido2/reg/response"
+        private const val AUTH_CHALLENGE_URI = "http://localhost:8081/fido2/auth/challenge"
+        private const val AUTH_RESPONSE_URI = "http://localhost:8081/fido2/auth/response"
+        private const val CREDENTIALS_URI = "http://localhost:8081/fido2/credentials"
     }
 
     override fun getRegisterOption(
@@ -87,6 +93,67 @@ class LineFido2ServerServiceImpl(
 
         return AdapterServerResponse(Status.OK, "")
     }
+
+    override fun getAuthenticateOption(
+        userName: String,
+    ): Pair<ServerPublicKeyCredentialGetOptionsResponse, String> {
+        val authOptionRequest = AuthOptionRequest
+            .builder()
+            .rpId(RP_ID)
+            .userId(createUserId(userName))
+            .userVerification(UserVerificationRequirement.DISCOURAGED)
+            .build()
+
+        val request = HttpEntity(authOptionRequest, HttpHeaders())
+        val response = restTemplate.postForObject(AUTH_CHALLENGE_URI, request, AuthOptionResponse::class.java)
+        if (response?.serverResponse?.internalErrorCode != 0) {
+            return ServerPublicKeyCredentialGetOptionsResponse(
+                Status.FAILED,
+                response?.serverResponse!!.internalErrorCodeDescription
+            ) to ""
+        }
+
+        return ServerPublicKeyCredentialGetOptionsResponse(response) to response.sessionId
+    }
+
+    override fun verifyAuthenticateAssertion(
+        sessionId: String,
+        clientResponse: Assertion,
+    ): Boolean {
+        val serverAuthPublicKeyCredential = ServerAuthPublicKeyCredential()
+        serverAuthPublicKeyCredential.response = clientResponse.response
+        serverAuthPublicKeyCredential.id = clientResponse.id
+        serverAuthPublicKeyCredential.type = clientResponse.type
+        serverAuthPublicKeyCredential.extensions = clientResponse.extensions
+
+        val verifyCredential = VerifyCredential()
+        verifyCredential.serverPublicKeyCredential = serverAuthPublicKeyCredential
+        verifyCredential.rpId = RP_ID
+        verifyCredential.sessionId = sessionId
+        verifyCredential.origin = ORIGIN
+
+        val request = HttpEntity(verifyCredential, HttpHeaders())
+
+        return try {
+            restTemplate.postForObject(AUTH_RESPONSE_URI, request, VerifyCredentialResult::class.java)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override fun getCredentialsWithUsername(
+        username: String,
+    ): GetCredentialsResult {
+        val userId = createUserId(username)
+        val uriComponentsBuilder = UriComponentsBuilder.fromUriString(CREDENTIALS_URI)
+        val uri = uriComponentsBuilder.queryParam("rpId", RP_ID)
+            .queryParam("userId", userId)
+            .build().toUri()
+        val response = restTemplate.exchange(uri, HttpMethod.GET, null, GetCredentialsResult::class.java)
+        return response.body!!
+    }
+
 
     private fun createUserId(username: String): String {
         val digest = Digests.sha256(username.toByteArray(StandardCharsets.UTF_8))

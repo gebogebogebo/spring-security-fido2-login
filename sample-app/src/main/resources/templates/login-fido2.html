@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>FIDO2 Authenticate</title>
+</head>
+<body onload="fido();">
+<div>
+    <p style="text-align: left;">FIDO2 Authenticate</p>
+    <form name="authenticate" th:action="@{/login}" method="post">
+        <p hidden>
+            <input type="text" id="username" name="username" th:value="${username}">
+            <input type="password" id="password" name="password" th:value="${password}">
+            <input type="text" id="assertion" name="assertion">
+            <button class="btn" type="submit">login</button>
+        </p>
+    </form>
+    <div>
+        <button href="#" type="button" id="fido">authenticate</button>
+        <div id="status">
+            ...
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="js/index.js"></script>
+
+</body>
+</html>

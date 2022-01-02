@@ -7,7 +7,7 @@
 <body>
 <div>
     <p style="text-align: left;">Sample Spring Security Login</p>
-    <form method="post" th:action="@{/login}">
+    <form method="post" th:action="@{/login-fido2}">
         <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
         <div th:if="${showLogoutedMsg}" th:text="${logoutedMsg}"></div>
         <p>

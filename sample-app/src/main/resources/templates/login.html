@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+</head>
+<body>
+<div>
+    <p style="text-align: left;">Sample Spring Security Login</p>
+    <form method="post" th:action="@{/login}">
+        <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
+        <div th:if="${showLogoutedMsg}" th:text="${logoutedMsg}"></div>
+        <p>
+            <input type="text" id="username" name="username" placeholder="username" required autofocus>
+        </p>
+        <p>
+            <input type="password" id="password" name="password" placeholder="passowrd" required>
+        </p>
+        <button class="btn" type="submit">login</button>
+    </form>
+</div>
+</body>
+</html>

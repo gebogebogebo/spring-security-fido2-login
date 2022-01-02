@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+	implementation(fileTree("lib/common-1.1.1-SNAPSHOT.jar"))
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")

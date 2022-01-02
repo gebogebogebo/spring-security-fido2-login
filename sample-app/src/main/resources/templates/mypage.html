@@ -7,10 +7,42 @@
 <body>
 <div>
     <p style="text-align: left;">My Page</p>
+
     <div th:text="${userName}"></div>
+    <hr>
+    <div>
+        <div>
+            FIDO2ログイン登録<br>
+            セキュリティキー(認証器)の種類を選択してください
+        </div>
+        <div>
+            <div>
+                <input type="radio" name="attachment" id="attachmentPlatform" value="platform" checked>
+                <label for="attachmentPlatform">
+                    タッチID などの いわゆる プラットフォーム認証器
+                </label>
+            </div>
+            <div>
+                <input type="radio" name="attachment" id="attachmentCrossPlatform" value="cross-platform">
+                <label for="attachmentCrossPlatform">
+                    Yubikey などの いわゆる クロスプラットフォーム認証器
+                </label>
+            </div>
+        </div>
+    </div>
+    <button href="#" type="button" id="register">Register</button>
+    <div id="status">
+        ...
+    </div>
+    <hr>
+
     <form th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="js/index.js"></script>
+
 </body>
 </html>

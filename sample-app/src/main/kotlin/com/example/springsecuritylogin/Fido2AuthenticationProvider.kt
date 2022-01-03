@@ -1,7 +1,6 @@
 package com.example.springsecuritylogin
 
 import com.example.springsecuritylogin.service.LineFido2ServerService
-import org.springframework.context.MessageSource
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -38,6 +37,4 @@ class Fido2AuthenticationProvider(
     }
 
     override fun doAfterPropertiesSet() {}
-
-    //override fun setMessageSource(messageSource: MessageSource) {}
 }

@@ -118,13 +118,13 @@ class LineFido2ServerServiceImpl(
 
     override fun verifyAuthenticateAssertion(
         sessionId: String,
-        clientResponse: Assertion,
+        assertion: Assertion,
     ): Boolean {
         val serverAuthPublicKeyCredential = ServerAuthPublicKeyCredential()
-        serverAuthPublicKeyCredential.response = clientResponse.response
-        serverAuthPublicKeyCredential.id = clientResponse.id
-        serverAuthPublicKeyCredential.type = clientResponse.type
-        serverAuthPublicKeyCredential.extensions = clientResponse.extensions
+        serverAuthPublicKeyCredential.response = assertion.response
+        serverAuthPublicKeyCredential.id = assertion.id
+        serverAuthPublicKeyCredential.type = assertion.type
+        serverAuthPublicKeyCredential.extensions = assertion.extensions
 
         val verifyCredential = VerifyCredential()
         verifyCredential.serverPublicKeyCredential = serverAuthPublicKeyCredential

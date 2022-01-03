@@ -1,5 +1,5 @@
 @startuml
-title FIDO2 Device Registration
+title FIDO2 Registration
 hide footbox
 
 box "Client" #FloralWhite
@@ -13,29 +13,30 @@ box "Server" #GhostWhite
     participant "LINE-FIDO2-Server\n\nhttp://localhost:8081" as Server
 end box
 
+note over Client : mypage.html
 User -> Client : Click Register Button
 
-group Get Reg Challenge
+group 1. Get Reg Challenge
     Client -> RP : POST /register/option
-    RP -> Server : POST /fido2/reg/challenge
+    RP -> Server : POST /fido2/reg/challenge\n - ID&Param
     note over Server : Generate Challenge&Option
-    RP <- Server : Response\n - Challenge&Option
-    Client <- RP : Response\n - Challenge&Option
+    RP <-- Server : 200 OK\n - Challenge&Option
+    Client <-- RP : 200 OK\n - Challenge&Option
 end group
 
-group WebAuthn
+group 2. WebAuthn
     note over Client : navigator.credentials.create()
     Key <-- Client : Connect
     Key <- User : User Verification
     Key --> Client : Response\n - Attestation
 end group
 
-group Get Reg Challenge
+group 3. Send Reg Response
     Client -> RP : POST /register/verify\n - Attestation
     RP -> Server : POST /fido2/reg/response\n - Attestation
     note over Server : Verify Attestation\nStore Credential to DB
-    RP <- Server : Response\n - Verify Result(ok)
-    Client <- RP : Response\n - Verify Result(ok)
+    RP <-- Server : 200 OK\n - Verify Result(ok)
+    Client <-- RP : 200 OK\n - Verify Result(ok)
 end group
 
 note over Client : Message\n- Registration Success

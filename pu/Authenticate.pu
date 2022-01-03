@@ -1,0 +1,64 @@
+@startuml
+title Authenticate
+hide footbox
+
+box "Client" #FloralWhite
+    participant "Security Key" as Key
+    actor  "User" as User
+    participant "Browser" as Client
+end box
+
+box "Server" #GhostWhite
+    participant "Sample-App(RP)\n\nhttp://localhost:8080" as RP
+    participant "LINE-FIDO2-Server\n\nhttp://localhost:8081" as Server
+end box
+
+note over Client : login.html
+
+User -> Client : Input ID/Password
+User -> Client : Click Login Button
+
+group 1. Get Credential by UserId
+    Client -> RP : POST /login-fido2\n - ID/Password
+    Client <-- RP : 200 OK
+    note over Client : login-fido2.html
+
+    Client -> RP : GET /credentials/count\n - ID
+    RP -> Server : GET /fido2/credentials\n - ID
+    RP <-- Server : 200 OK\n - Credentials
+    Client <-- RP : 200 OK\n - CredentialsCount
+end group
+
+group 2. Get Auth Challenge [CredentialsCount > 0]
+    Client -> RP : POST /authenticate/option\n - ID
+    RP -> Server : POST /fido2/auth/challenge
+    note over Server : Generate Challenge&Option
+    RP <-- Server : 200 OK\n - Challenge&Option
+    Client <-- RP : 200 OK\n - Challenge&Option
+end group
+
+group 3. WebAuthn
+    note over Client : navigator.credentials.get()
+    Key <-- Client : Connect
+    Key <- User : User Presence
+    Key --> Client : Response\n - Assertion
+    Client -> RP : POST /login\n - ID/Password/Assertion
+end group
+
+group 4. Verify ID/Password
+    note over RP : Verify ID/Password
+end group
+
+group 5. Verify Assertion(Send Auth Response)
+    RP -> Server : POST /fido2/auth/response\n - Assertion
+    note over Server : Verify Assertion
+    RP <- Server : 200 OK\n - Verify Result(ok)
+    note over RP : Spring Security Login
+    Client <-- RP : 302 Redirect\n - /mypage
+end group
+
+Client -> RP : GET /mypage
+Client <-- RP : 200 OK
+note over Client : mypage.html
+
+@enduml

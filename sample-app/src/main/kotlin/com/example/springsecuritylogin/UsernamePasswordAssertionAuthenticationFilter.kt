@@ -17,7 +17,7 @@ class UsernamePasswordAssertionAuthenticationFilter : UsernamePasswordAuthentica
         }
 
         val json = request.getParameter("assertion")
-        if (!json.isNullOrEmpty()) {
+        return if (!json.isNullOrEmpty()) {
             val username = obtainUsername(request) ?: ""
             val password = obtainPassword(request) ?: ""
             val sessionId = LineFido2Util.getFido2SessionId(request)
@@ -25,10 +25,9 @@ class UsernamePasswordAssertionAuthenticationFilter : UsernamePasswordAuthentica
 
             val authRequest = UsernamePasswordAssertionAuthenticationToken(username, password, sessionId, assertion)
             setDetails(request, authRequest)
-
-            return authenticationManager.authenticate(authRequest)
+            authenticationManager.authenticate(authRequest)
         } else {
-            return super.attemptAuthentication(request, response)
+            super.attemptAuthentication(request, response)
         }
     }
 }

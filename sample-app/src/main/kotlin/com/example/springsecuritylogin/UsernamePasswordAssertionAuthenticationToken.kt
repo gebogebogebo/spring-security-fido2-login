@@ -8,5 +8,4 @@ class UsernamePasswordAssertionAuthenticationToken(
     password:String,
     val sessionId: String,
     val assertion: Assertion,
-): UsernamePasswordAuthenticationToken(username,password) {
-}
+): UsernamePasswordAuthenticationToken(username,password)

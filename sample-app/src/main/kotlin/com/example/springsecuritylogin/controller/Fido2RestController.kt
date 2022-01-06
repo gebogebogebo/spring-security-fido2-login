@@ -1,14 +1,11 @@
 package com.example.springsecuritylogin.controller
 
-import com.example.springsecuritylogin.service.*
-import com.example.springsecuritylogin.util.LineFido2Util
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.web.bind.annotation.GetMapping
+import com.example.springsecuritylogin.service.Attestation
+import com.example.springsecuritylogin.service.LineFido2ServerService
+import com.example.springsecuritylogin.service.Status
+import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -24,19 +21,13 @@ class Fido2RestController(
         httpServletResponse: HttpServletResponse
     ): ServerPublicKeyCredentialCreationOptionsResponse {
         return try {
-            val principal = SecurityContextHolder.getContext().authentication.principal
-            val username = if (principal is UserDetails) {
-                principal.username
-            } else {
-                throw UsernameNotFoundException("userId is null or empty")
-            }
-
+            val user = SampleUtil.getLoginUser()
             val (serverResponse, sessionId) = lineFido2ServerService.getRegisterOption(
-                username,
+                user!!.username,
                 optionsRequest.authenticatorAttachment
             )
 
-            LineFido2Util.setFido2SessionId(sessionId, httpServletResponse)
+            SampleUtil.setFido2SessionId(sessionId, httpServletResponse)
             serverResponse
         } catch (e: Exception) {
             ServerPublicKeyCredentialCreationOptionsResponse(Status.FAILED, e.message ?: "")
@@ -48,7 +39,7 @@ class Fido2RestController(
         @RequestBody clientResponse: Attestation,
         httpServletRequest: HttpServletRequest
     ): AdapterServerResponse {
-        val sessionId = LineFido2Util.getFido2SessionId(httpServletRequest)
+        val sessionId = SampleUtil.getFido2SessionId(httpServletRequest)
         if (sessionId.isNullOrEmpty()) {
             return AdapterServerResponse(Status.FAILED, "Cookie not found")
         }
@@ -65,30 +56,15 @@ class Fido2RestController(
 
     @PostMapping("/authenticate/option")
     fun authenticateOption(
-        @RequestBody optionsRequest: ServerPublicKeyCredentialGetOptionsRequest,
         httpServletResponse: HttpServletResponse
     ): ServerPublicKeyCredentialGetOptionsResponse {
         return try {
-            val (serverResponse, sessionId) = lineFido2ServerService.getAuthenticateOption(
-                optionsRequest.username,
-            )
-            LineFido2Util.setFido2SessionId(sessionId, httpServletResponse)
+            val user = SampleUtil.getLoginUser()
+            val (serverResponse, sessionId) = lineFido2ServerService.getAuthenticateOption(user!!.username)
+            SampleUtil.setFido2SessionId(sessionId, httpServletResponse)
             serverResponse
         } catch (e: Exception) {
             ServerPublicKeyCredentialGetOptionsResponse(Status.FAILED, e.message ?: "")
-        }
-    }
-
-    @GetMapping("/credentials/count")
-    fun credentialsCount(
-        @RequestParam("username") username: String,
-        httpServletRequest: HttpServletRequest
-    ): CredentialsCountResponse {
-        return try {
-            val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(username)
-            CredentialsCountResponse(getCredentialsResult.credentials.count())
-        } catch (e: Exception) {
-            CredentialsCountResponse(Status.FAILED, e.message ?: "")
         }
     }
 }

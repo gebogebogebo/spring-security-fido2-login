@@ -1,40 +1,41 @@
 package com.example.springsecuritylogin
 
 import com.example.springsecuritylogin.service.LineFido2ServerService
+import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 
 @Component
 class Fido2AuthenticationProvider(
     private val lineFido2ServerService: LineFido2ServerService,
-) : DaoAuthenticationProvider() {
-    override fun additionalAuthenticationChecks(
-        userDetails: UserDetails,
-        authentication: UsernamePasswordAuthenticationToken
-    ) {
-        // verify password
-        super.additionalAuthenticationChecks(userDetails, authentication)
-
-        if (authentication is UsernamePasswordAssertionAuthenticationToken) {
+) : AuthenticationProvider {
+    override fun authenticate(authentication: Authentication): Authentication {
+        if (authentication is AssertionAuthenticationToken) {
             // verify FIDO assertion
             if (!lineFido2ServerService.verifyAuthenticateAssertion(
-                    authentication.sessionId,
-                    authentication.assertion,
+                    authentication.credentials.sessionId,
+                    authentication.credentials.assertion,
                 )
             ) {
                 throw BadCredentialsException("Invalid Assertion")
             }
         } else {
-            // verify password only
-            val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(userDetails.username)
-            if (getCredentialsResult.credentials.isNotEmpty()) {
-                throw BadCredentialsException("Two-factor authentication required")
-            }
+            throw BadCredentialsException("Invalid Authentication")
         }
+
+        // TODO
+        var authorities = mutableListOf<SimpleGrantedAuthority>()
+        authorities.add(SimpleGrantedAuthority("authenticated-fido"))
+
+        // set Authenticated
+        var result = AssertionAuthenticationToken(authentication.principal, authentication.credentials, authorities)
+        result.isAuthenticated = true
+        return result
     }
 
-    override fun doAfterPropertiesSet() {}
+    override fun supports(authentication: Class<*>?): Boolean {
+        return AssertionAuthenticationToken::class.java.isAssignableFrom(authentication)
+    }
 }

@@ -31,43 +31,17 @@ function registerButtonClicked() {
  * fido
  */
 function fido() {
-    let username  = $("input[name='username']").val();
-
-    let serverPublicKeyCredentialGetOptionsRequest = {
-        username: username,
-    };
-
-    getCredentialsCount(username)
-        .then(count => {
-            if( count > 0) {
-                getAuthChallenge(serverPublicKeyCredentialGetOptionsRequest)
-                    .then(getCredentialOptions => {
-                        return getAssertion(getCredentialOptions);
-                    })
-                    .then(assertion => {
-                        $("#assertion").val(JSON.stringify(assertion));
-                        document.authenticate.submit();
-                        return;
-                    })
-            } else {
-                document.authenticate.submit();
-                return;
-            }
+    getAuthChallenge()
+        .then(getCredentialOptions => {
+            return getAssertion(getCredentialOptions);
+        })
+        .then(assertion => {
+            $("#assertion").val(JSON.stringify(assertion));
+            document.authenticate.submit();
+            return;
         })
         .catch(e => {
             $("#status").text("Error: " + e);
-        });
-}
-
-function getCredentialsCount(username) {
-    var url = `/credentials/count?username=${username}`;
-    return rest_get(url)
-        .then(response => {
-            if (response.status !== 'ok') {
-                return Promise.reject(response.errorMessage);
-            } else {
-                return Promise.resolve(response.count);
-            }
         });
 }
 
@@ -85,9 +59,8 @@ function getRegChallenge(serverPublicKeyCredentialCreationOptionsRequest) {
         });
 }
 
-function getAuthChallenge(serverPublicKeyCredentialGetOptionsRequest) {
-    logObject("Get auth challenge", serverPublicKeyCredentialGetOptionsRequest);
-    return rest_post("/authenticate/option", serverPublicKeyCredentialGetOptionsRequest)
+function getAuthChallenge() {
+    return rest_post("/authenticate/option", "")
         .then(response => {
             logObject("Get auth challenge", response);
             if (response.status !== 'ok') {
@@ -96,16 +69,6 @@ function getAuthChallenge(serverPublicKeyCredentialGetOptionsRequest) {
                 let getCredentialOptions = performGetCredReq(response);
                 return Promise.resolve(getCredentialOptions);
             }
-        });
-}
-
-function rest_get(endpoint) {
-    return fetch(endpoint, {
-            method: "GET",
-            credentials: "same-origin"
-        })
-        .then(response => {
-            return response.json();
         });
 }
 

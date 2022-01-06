@@ -1,6 +1,7 @@
 package com.example.springsecuritylogin.service
 
 import com.example.springsecuritylogin.repository.MuserRepository
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -10,7 +11,8 @@ import java.util.Collections
 
 @Service
 class SampleUserDetailsService(
-    private val mUserRepository: MuserRepository
+    private val mUserRepository: MuserRepository,
+    private val lineFido2ServerService: LineFido2ServerService,
 ): UserDetailsService {
 
     // loadUserByUsername
@@ -28,6 +30,15 @@ class SampleUserDetailsService(
 
         val mUser = mUserRepository.findById(userId).orElse(null) ?: throw UsernameNotFoundException("Not found userId")
 
-        return User(mUser.id,mUser.password, Collections.emptyList())
+        val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(userId)
+
+        val authorities = if (getCredentialsResult.credentials.isEmpty()) {
+            Collections.emptyList()
+        }else {
+            // TODO
+            listOf(SimpleGrantedAuthority("pre-authenticate-fido"))
+        }
+
+        return User(mUser.id,mUser.password, authorities)
     }
 }

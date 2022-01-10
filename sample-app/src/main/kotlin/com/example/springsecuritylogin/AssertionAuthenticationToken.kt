@@ -12,11 +12,6 @@ class AssertionAuthenticationToken(
     val credentials: Fido2Credentials,
     authorities: Collection<SimpleGrantedAuthority>,
 ) : AbstractAuthenticationToken(authorities) {
-    constructor(
-        principal: User,
-        credentials: Fido2Credentials,
-    ) : this(principal, credentials, Collections.emptyList())
-
     override fun getPrincipal(): Any {
         return principal
     }

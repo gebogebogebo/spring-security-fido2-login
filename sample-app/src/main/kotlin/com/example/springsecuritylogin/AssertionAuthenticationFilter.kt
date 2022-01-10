@@ -5,6 +5,7 @@ import com.example.springsecuritylogin.util.SampleUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
@@ -27,9 +28,14 @@ class AssertionAuthenticationFilter(
 
         val credentials = AssertionAuthenticationToken.Fido2Credentials(
             SampleUtil.getFido2SessionId(request),
-            assertion)
+            assertion
+        )
 
-        val authRequest = AssertionAuthenticationToken(principal, credentials)
+        val authorities = principal.authorities.map {
+            SimpleGrantedAuthority(it.authority)
+        }
+
+        val authRequest = AssertionAuthenticationToken(principal, credentials, authorities)
         setDetails(request, authRequest)
         return authenticationManager.authenticate(authRequest)
     }
@@ -42,7 +48,7 @@ class AssertionAuthenticationFilter(
         return ObjectMapper().readValue(json, Assertion::class.java)
     }
 
-    private fun obtainPrincipal(request: HttpServletRequest): User{
+    private fun obtainPrincipal(request: HttpServletRequest): User {
         val session = request.session
         val securityContext = session.getAttribute("SPRING_SECURITY_CONTEXT") as SecurityContext
         val principal = securityContext.authentication.principal

@@ -34,11 +34,14 @@ class SampleUserDetailsService(
         val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(userId)
 
         val authorities = if (getCredentialsResult.credentials.isEmpty()) {
-            Collections.emptyList()
+            // TODO
+            //Collections.emptyList()
+            listOf(SimpleGrantedAuthority("ROLE_USER"))
         }else {
             listOf(SimpleGrantedAuthority(SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value))
         }
 
         return User(mUser.id,mUser.password, authorities)
     }
+
 }

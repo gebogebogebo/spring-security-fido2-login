@@ -9,8 +9,13 @@ import javax.servlet.http.HttpServletResponse
 class SampleUtil {
 
     enum class Auth(val value: String) {
+        AUTHENTICATED_PASSWORD("authenticated-password"),
         PRE_AUTHENTICATE_FIDO("pre-authenticate-fido"),
         AUTHENTICATED_FIDO("authenticated-fido"),
+    }
+
+    enum class Role(val value: String) {
+        USER("ROLE_USER")
     }
 
     companion object {

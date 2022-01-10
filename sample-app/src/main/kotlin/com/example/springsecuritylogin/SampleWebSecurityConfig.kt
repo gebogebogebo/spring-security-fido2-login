@@ -1,6 +1,7 @@
 package com.example.springsecuritylogin
 
 import com.example.springsecuritylogin.service.SampleUserDetailsService
+import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -53,7 +54,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
             .authorizeRequests()
             .antMatchers("/h2-console/**").permitAll()
             .antMatchers("/login", "/login-fido2", "/authenticate/option").permitAll()
-            .anyRequest().authenticated()
+            .anyRequest().hasRole(SampleUtil.Role.USER.name)
 
         // Security Filter
         http

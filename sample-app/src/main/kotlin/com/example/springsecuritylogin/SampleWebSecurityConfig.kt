@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 
 
 @Configuration
@@ -53,32 +52,22 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .authorizeRequests()
             .antMatchers("/h2-console/**").permitAll()
-            .antMatchers("/login", "/to-login-fido2", "/login-fido2", "/authenticate/**", "/credentials/count")
-            .permitAll()
+            .antMatchers("/login", "/login-fido2", "/authenticate/option").permitAll()
             .anyRequest().authenticated()
-        /*
-    .and()
-    .formLogin()
-        .loginPage("/login").permitAll()
-        .defaultSuccessUrl("/mypage", true)
-        */
+
+        // Security Filter
+        http
+            .formLogin()
+            .loginPage("/login").permitAll()
+            .successHandler(SampleForwardAuthenticationSuccessHandler("/login-fido2"))
+            .failureUrl("/login?error")
+
+        http
+            .addFilterAt(createAssertionAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
         // for h2db debug
         http.csrf().disable()
         http.headers().frameOptions().disable()
-
-        // Security Filter
-        http.addFilterAt(createAssertionAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
-        http.addFilterAt(createUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
-    }
-
-    private fun createUsernamePasswordAuthenticationFilter(): UsernamePasswordAuthenticationFilter {
-        return UsernamePasswordAuthenticationFilter().also {
-            it.setRequiresAuthenticationRequestMatcher(AntPathRequestMatcher("/login", "POST"))
-            it.setAuthenticationManager(authenticationManagerBean())
-            it.setAuthenticationSuccessHandler(SampleForwardAuthenticationSuccessHandler("/login-fido2"))
-            it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
-        }
     }
 
     private fun createAssertionAuthenticationFilter(): AssertionAuthenticationFilter {

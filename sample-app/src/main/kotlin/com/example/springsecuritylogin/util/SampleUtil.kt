@@ -8,6 +8,11 @@ import javax.servlet.http.HttpServletResponse
 
 class SampleUtil {
 
+    enum class Auth(val value: String) {
+        PRE_AUTHENTICATE_FIDO("pre-authenticate-fido"),
+        AUTHENTICATED_FIDO("authenticated-fido"),
+    }
+
     companion object {
         private const val COOKIE_NAME = "fido2-session-id"
 

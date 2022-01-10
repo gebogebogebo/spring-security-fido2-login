@@ -1,6 +1,7 @@
 package com.example.springsecuritylogin
 
 import com.example.springsecuritylogin.service.LineFido2ServerService
+import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
@@ -25,11 +26,8 @@ class Fido2AuthenticationProvider(
             throw BadCredentialsException("Invalid Authentication")
         }
 
-        // TODO
-        var authorities = mutableListOf<SimpleGrantedAuthority>()
-        authorities.add(SimpleGrantedAuthority("authenticated-fido"))
-
         // set Authenticated
+        var authorities = listOf(SimpleGrantedAuthority(SampleUtil.Auth.AUTHENTICATED_FIDO.value))
         var result = AssertionAuthenticationToken(authentication.principal, authentication.credentials, authorities)
         result.isAuthenticated = true
         return result

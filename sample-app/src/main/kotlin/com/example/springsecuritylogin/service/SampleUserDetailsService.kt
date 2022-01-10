@@ -1,6 +1,7 @@
 package com.example.springsecuritylogin.service
 
 import com.example.springsecuritylogin.repository.MuserRepository
+import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -35,8 +36,7 @@ class SampleUserDetailsService(
         val authorities = if (getCredentialsResult.credentials.isEmpty()) {
             Collections.emptyList()
         }else {
-            // TODO
-            listOf(SimpleGrantedAuthority("pre-authenticate-fido"))
+            listOf(SimpleGrantedAuthority(SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value))
         }
 
         return User(mUser.id,mUser.password, authorities)

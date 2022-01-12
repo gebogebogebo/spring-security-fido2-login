@@ -60,7 +60,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .formLogin()
             .loginPage("/login").permitAll()
-            .successHandler(SampleForwardAuthenticationSuccessHandler("/login-fido2"))
+            .successHandler(SampleAuthenticationSuccessHandler("/login-fido2"))
             .failureUrl("/login?error")
 
         http
@@ -71,10 +71,10 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http.headers().frameOptions().disable()
     }
 
-    private fun createAssertionAuthenticationFilter(): AssertionAuthenticationFilter {
-        return AssertionAuthenticationFilter("/login-fido2", "POST").also {
+    private fun createAssertionAuthenticationFilter(): Fido2AuthenticationFilter {
+        return Fido2AuthenticationFilter("/login-fido2", "POST").also {
             it.setAuthenticationManager(authenticationManagerBean())
-            it.setAuthenticationSuccessHandler(SampleForwardAuthenticationSuccessHandler("/mypage"))
+            it.setAuthenticationSuccessHandler(SampleAuthenticationSuccessHandler("/mypage"))
             it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
         }
     }

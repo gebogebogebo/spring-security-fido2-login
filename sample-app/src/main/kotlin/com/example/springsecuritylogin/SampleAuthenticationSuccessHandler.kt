@@ -6,7 +6,7 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class SampleForwardAuthenticationSuccessHandler(
+class SampleAuthenticationSuccessHandler(
     private val redirectUrl: String
 ) : SavedRequestAwareAuthenticationSuccessHandler() {
     override fun onAuthenticationSuccess(

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 
-class AssertionAuthenticationFilter(
+class Fido2AuthenticationFilter(
     pattern: String,
     httpMethod: String,
 ) : AbstractAuthenticationProcessingFilter(AntPathRequestMatcher(pattern, httpMethod)) {

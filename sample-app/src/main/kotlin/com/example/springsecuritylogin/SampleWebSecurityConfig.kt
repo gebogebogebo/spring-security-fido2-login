@@ -22,18 +22,6 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
     @Autowired
     private lateinit var userDetailsService: SampleUserDetailsService
 
-    /*
-    @Autowired
-    fun configureGlobal(
-        auth: AuthenticationManagerBuilder,
-        userDetailsService: UserDetailsService,
-    ) {
-        authenticationProvider.setUserDetailsService(userDetailsService)
-        auth.eraseCredentials(true)
-            .authenticationProvider(authenticationProvider)
-    }
-    */
-
     override fun configure(
         auth: AuthenticationManagerBuilder,
     ) {

@@ -49,7 +49,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .formLogin()
             .loginPage("/login").permitAll()
-            .successHandler(SampleAuthenticationSuccessHandler("/login-fido2"))
+            .successHandler(UsernamePasswordAuthenticationSuccessHandler("/login-fido2","/mypage"))
             .failureUrl("/login?error")
 
         http

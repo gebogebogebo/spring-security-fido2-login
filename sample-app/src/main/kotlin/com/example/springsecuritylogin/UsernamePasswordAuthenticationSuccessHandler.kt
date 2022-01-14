@@ -2,13 +2,14 @@ package com.example.springsecuritylogin
 
 import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.security.core.Authentication
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class SampleAuthenticationSuccessHandler(
-    private val redirectUrl: String
-) : SavedRequestAwareAuthenticationSuccessHandler() {
+class UsernamePasswordAuthenticationSuccessHandler(
+    private val nextAuthUrl: String,
+    defaultTargetUrl: String
+) : SimpleUrlAuthenticationSuccessHandler(defaultTargetUrl) {
     override fun onAuthenticationSuccess(
         request: HttpServletRequest?,
         response: HttpServletResponse?,
@@ -19,7 +20,7 @@ class SampleAuthenticationSuccessHandler(
         } ?: false
 
         if (needFido) {
-            response?.sendRedirect(redirectUrl)
+            response?.sendRedirect(nextAuthUrl)
         } else {
             super.onAuthenticationSuccess(request, response, authentication)
         }

@@ -52,17 +52,17 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
             .failureUrl("/login?error")
 
         http
-            .addFilterAt(createAssertionAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAt(createFido2AuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
         // for h2db debug
         http.csrf().disable()
         http.headers().frameOptions().disable()
     }
 
-    private fun createAssertionAuthenticationFilter(): Fido2AuthenticationFilter {
+    private fun createFido2AuthenticationFilter(): Fido2AuthenticationFilter {
         return Fido2AuthenticationFilter("/login-fido2", "POST").also {
             it.setAuthenticationManager(authenticationManagerBean())
-            it.setAuthenticationSuccessHandler(SampleAuthenticationSuccessHandler("/mypage"))
+            it.setAuthenticationSuccessHandler(SampleAuthenticationSuccessHandler(""))
             it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
         }
     }

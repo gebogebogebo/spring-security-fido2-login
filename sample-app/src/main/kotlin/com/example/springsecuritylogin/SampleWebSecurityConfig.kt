@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 
@@ -62,7 +63,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
     private fun createFido2AuthenticationFilter(): Fido2AuthenticationFilter {
         return Fido2AuthenticationFilter("/login-fido2", "POST").also {
             it.setAuthenticationManager(authenticationManagerBean())
-            it.setAuthenticationSuccessHandler(SampleAuthenticationSuccessHandler(""))
+            it.setAuthenticationSuccessHandler(SimpleUrlAuthenticationSuccessHandler("/mypage"))
             it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
         }
     }

@@ -119,7 +119,6 @@ let performMakeCredReq = (makeCredReq) => {
 
     delete makeCredReq.status;
     delete makeCredReq.errorMessage;
-    // delete makeCredReq.authenticatorSelection;
 
     removeEmpty(makeCredReq);
 

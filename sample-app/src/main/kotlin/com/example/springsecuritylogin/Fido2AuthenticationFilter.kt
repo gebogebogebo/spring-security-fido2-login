@@ -61,5 +61,4 @@ class Fido2AuthenticationFilter(
     private fun setDetails(request: HttpServletRequest?, authRequest: AssertionAuthenticationToken) {
         authRequest.details = authenticationDetailsSource.buildDetails(request)
     }
-
 }

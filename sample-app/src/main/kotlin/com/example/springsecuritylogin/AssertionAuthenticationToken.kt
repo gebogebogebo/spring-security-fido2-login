@@ -4,7 +4,6 @@ import com.example.springsecuritylogin.service.Assertion
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
-import java.util.Collections
 
 
 class AssertionAuthenticationToken(

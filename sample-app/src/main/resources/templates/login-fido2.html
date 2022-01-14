@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>FIDO2 Authenticate</title>
 </head>
-<body>
+<body onload="fido();">
 <div>
     <p style="text-align: left;">FIDO2 Authenticate</p>
     <form name="authenticate" th:action="@{/login-fido2}" method="post">

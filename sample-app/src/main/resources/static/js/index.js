@@ -1,5 +1,6 @@
 $(window).on('load', function () {
-    $("#register").on('click', () => registerButtonClicked());
+    $("#registe2fa").on('click', () => register2faButtonClicked());
+    $("#registePasswordless").on('click', () => registerPasswordlessButtonClicked());
     $("#fido").on('click', () => fido());
 });
 
@@ -9,10 +10,11 @@ const abortSignal = abortController.signal;
 /**
  * Register
  */
-function registerButtonClicked() {
-    let attachment = $("input[name='attachment']:checked").val();
+function register2faButtonClicked() {
+    let attachment = $("input[name='attachment2fa']:checked").val();
     let serverPublicKeyCredentialCreationOptionsRequest = {
         authenticatorAttachment: attachment,
+        requireResidentKey: false,
     };
 
     getRegChallenge(serverPublicKeyCredentialCreationOptionsRequest)
@@ -20,10 +22,29 @@ function registerButtonClicked() {
             return createCredential(createCredentialOptions);
         })
         .then(() => {
-            $("#status").text("Successfully created credential");
+            $("#status2fa").text("Successfully created credential");
         })
         .catch(e => {
-            $("#status").text("Error: " + e);
+            $("#status2fa").text("Error: " + e);
+        });
+}
+
+function registerPasswordlessButtonClicked() {
+    let attachment = $("input[name='attachmentPasswordless']:checked").val();
+    let serverPublicKeyCredentialCreationOptionsRequest = {
+        authenticatorAttachment: attachment,
+        requireResidentKey: true,
+    };
+
+    getRegChallenge(serverPublicKeyCredentialCreationOptionsRequest)
+        .then(createCredentialOptions => {
+            return createCredential(createCredentialOptions);
+        })
+        .then(() => {
+            $("#statusPasswordless").text("Successfully created credential");
+        })
+        .catch(e => {
+            $("#statusPasswordless").text("Error: " + e);
         });
 }
 

@@ -24,7 +24,8 @@ class Fido2RestController(
             val user = SampleUtil.getLoginUser()
             val (serverResponse, sessionId) = lineFido2ServerService.getRegisterOption(
                 user!!.username,
-                optionsRequest.authenticatorAttachment
+                optionsRequest.authenticatorAttachment,
+                optionsRequest.requireResidentKey,
             )
 
             SampleUtil.setFido2SessionId(sessionId, httpServletResponse)

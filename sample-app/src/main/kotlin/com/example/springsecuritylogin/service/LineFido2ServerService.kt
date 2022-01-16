@@ -9,7 +9,8 @@ import com.linecorp.line.auth.fido.fido2.common.server.GetCredentialsResult
 interface LineFido2ServerService {
     fun getRegisterOption(
         userName: String,
-        authenticatorAttachment: AuthenticatorAttachment?,
+        authenticatorAttachment: AuthenticatorAttachment?,      // TODO
+        requireResidentKey: Boolean,
     ): Pair<ServerPublicKeyCredentialCreationOptionsResponse, String>
 
     fun verifyRegisterAttestation(

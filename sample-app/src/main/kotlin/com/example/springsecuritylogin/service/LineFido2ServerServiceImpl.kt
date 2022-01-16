@@ -38,6 +38,7 @@ class LineFido2ServerServiceImpl(
     override fun getRegisterOption(
         userName: String,
         authenticatorAttachment: AuthenticatorAttachment?,
+        requireResidentKey: Boolean,
     ): Pair<ServerPublicKeyCredentialCreationOptionsResponse, String> {
         val rp = PublicKeyCredentialRpEntity()
         rp.id = RP_ID
@@ -50,7 +51,7 @@ class LineFido2ServerServiceImpl(
 
         val authenticatorSelection = AuthenticatorSelectionCriteria()
         authenticatorSelection.authenticatorAttachment = authenticatorAttachment
-        authenticatorSelection.isRequireResidentKey = false
+        authenticatorSelection.isRequireResidentKey = requireResidentKey
         authenticatorSelection.userVerification = UserVerificationRequirement.REQUIRED
 
         val regOptionRequest = RegOptionRequest
@@ -135,7 +136,7 @@ class LineFido2ServerServiceImpl(
         val request = HttpEntity(verifyCredential, HttpHeaders())
 
         return try {
-            restTemplate.postForObject(AUTH_RESPONSE_URI, request, VerifyCredentialResult::class.java)
+            val response = restTemplate.postForObject(AUTH_RESPONSE_URI, request, VerifyCredentialResult::class.java)
             true
         } catch (e: Exception) {
             false

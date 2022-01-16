@@ -50,7 +50,8 @@ class Fido2AuthenticationFilter(
 
     private fun obtainPrincipal(request: HttpServletRequest): User {
         val session = request.session
-        val securityContext = session.getAttribute("SPRING_SECURITY_CONTEXT") as SecurityContext
+        val securityContext = session.getAttribute("SPRING_SECURITY_CONTEXT") as? SecurityContext
+            ?: return User("<dmy>","",emptyList())
         val principal = securityContext.authentication.principal
         if (principal !is User) {
             throw AuthenticationServiceException("assertion")

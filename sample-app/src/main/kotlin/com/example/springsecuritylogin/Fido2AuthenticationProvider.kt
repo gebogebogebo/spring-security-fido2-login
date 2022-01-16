@@ -14,7 +14,7 @@ class Fido2AuthenticationProvider(
     private val lineFido2ServerService: LineFido2ServerService,
 ) : AuthenticationProvider {
     override fun authenticate(authentication: Authentication): Authentication {
-        if (authentication is AssertionAuthenticationToken) {
+        val userName = if (authentication is AssertionAuthenticationToken) {
             // verify FIDO assertion
             if (!lineFido2ServerService.verifyAuthenticateAssertion(
                     authentication.credentials.sessionId,
@@ -23,6 +23,8 @@ class Fido2AuthenticationProvider(
             ) {
                 throw BadCredentialsException("Invalid Assertion")
             }
+            val credential = lineFido2ServerService.getCredentialWithCredentialId(authentication.credentials.assertion.id)
+            credential.name
         } else {
             throw BadCredentialsException("Invalid Authentication")
         }
@@ -33,10 +35,7 @@ class Fido2AuthenticationProvider(
             SimpleGrantedAuthority(SampleUtil.Role.USER.value)
         )
 
-        val principalNew = User(
-            authentication.principal.username,
-            authentication.principal.password ?: "",
-            authorities)
+        val principalNew = User(userName,"", authorities)
 
         var result = AssertionAuthenticationToken(principalNew, authentication.credentials, authorities)
         result.isAuthenticated = true

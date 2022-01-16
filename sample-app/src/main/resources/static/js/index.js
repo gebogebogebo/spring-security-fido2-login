@@ -1,7 +1,7 @@
 $(window).on('load', function () {
     $("#registe2fa").on('click', () => register2faButtonClicked());
     $("#registePasswordless").on('click', () => registerPasswordlessButtonClicked());
-    $("#fido").on('click', () => fido());
+    $("#authenticatefido").on('click', () => authenticateFido());
 });
 
 const abortController = new AbortController();
@@ -49,9 +49,9 @@ function registerPasswordlessButtonClicked() {
 }
 
 /**
- * fido
+ * Authenticate
  */
-function fido() {
+function authenticateFido() {
     getAuthChallenge()
         .then(getCredentialOptions => {
             return getAssertion(getCredentialOptions);

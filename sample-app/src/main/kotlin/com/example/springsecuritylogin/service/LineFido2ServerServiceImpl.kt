@@ -3,11 +3,7 @@ package com.example.springsecuritylogin.service
 import com.example.springsecuritylogin.controller.AdapterServerResponse
 import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialCreationOptionsResponse
 import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialGetOptionsResponse
-import com.linecorp.line.auth.fido.fido2.common.AttestationConveyancePreference
-import com.linecorp.line.auth.fido.fido2.common.AuthenticatorAttachment
-import com.linecorp.line.auth.fido.fido2.common.AuthenticatorSelectionCriteria
-import com.linecorp.line.auth.fido.fido2.common.PublicKeyCredentialRpEntity
-import com.linecorp.line.auth.fido.fido2.common.UserVerificationRequirement
+import com.linecorp.line.auth.fido.fido2.common.*
 import com.linecorp.line.auth.fido.fido2.common.crypto.Digests
 import com.linecorp.line.auth.fido.fido2.common.extension.CredProtect
 import com.linecorp.line.auth.fido.fido2.common.server.*
@@ -32,7 +28,7 @@ class LineFido2ServerServiceImpl(
         private const val REG_RESPONSE_URI = "http://localhost:8081/fido2/reg/response"
         private const val AUTH_CHALLENGE_URI = "http://localhost:8081/fido2/auth/challenge"
         private const val AUTH_RESPONSE_URI = "http://localhost:8081/fido2/auth/response"
-        private const val CREDENTIALS_URI = "http://localhost:8081/fido2/credentials"
+        private const val CREDENTIALS_URI = "http://localhost:8081/fido2/credentials/"
     }
 
     override fun getRegisterOption(
@@ -47,7 +43,7 @@ class LineFido2ServerServiceImpl(
         val user = ServerPublicKeyCredentialUserEntity()
         user.name = userName
         user.id = createUserId(userName)
-        user.displayName = userName
+        user.displayName = "$RP_NAME $userName"
 
         val authenticatorSelection = AuthenticatorSelectionCriteria()
         authenticatorSelection.authenticatorAttachment = authenticatorAttachment
@@ -96,14 +92,22 @@ class LineFido2ServerServiceImpl(
     }
 
     override fun getAuthenticateOption(
-        userName: String,
+        userName: String?,
     ): Pair<ServerPublicKeyCredentialGetOptionsResponse, String> {
-        val authOptionRequest = AuthOptionRequest
-            .builder()
-            .rpId(RP_ID)
-            .userId(createUserId(userName))
-            .userVerification(UserVerificationRequirement.DISCOURAGED)
-            .build()
+        val authOptionRequest = if (userName.isNullOrEmpty()) {
+            AuthOptionRequest
+                .builder()
+                .rpId(RP_ID)
+                .userVerification(UserVerificationRequirement.REQUIRED)
+                .build()
+        } else {
+            AuthOptionRequest
+                .builder()
+                .rpId(RP_ID)
+                .userId(createUserId(userName!!))
+                .userVerification(UserVerificationRequirement.DISCOURAGED)
+                .build()
+        }
 
         val request = HttpEntity(authOptionRequest, HttpHeaders())
         val response = restTemplate.postForObject(AUTH_CHALLENGE_URI, request, AuthOptionResponse::class.java)
@@ -136,6 +140,7 @@ class LineFido2ServerServiceImpl(
         val request = HttpEntity(verifyCredential, HttpHeaders())
 
         return try {
+            // TODO パスワードレスのときは UV が true であること
             val response = restTemplate.postForObject(AUTH_RESPONSE_URI, request, VerifyCredentialResult::class.java)
             true
         } catch (e: Exception) {
@@ -145,16 +150,28 @@ class LineFido2ServerServiceImpl(
 
     override fun getCredentialsWithUsername(
         username: String,
-    ): GetCredentialsResult {
+    ): List<ServerUserKey> {
         val userId = createUserId(username)
         val uriComponentsBuilder = UriComponentsBuilder.fromUriString(CREDENTIALS_URI)
-        val uri = uriComponentsBuilder.queryParam("rpId", RP_ID)
+        val uri = uriComponentsBuilder
+            .queryParam("rpId", RP_ID)
             .queryParam("userId", userId)
             .build().toUri()
         val response = restTemplate.exchange(uri, HttpMethod.GET, null, GetCredentialsResult::class.java)
-        return response.body!!
+        return response.body!!.credentials
     }
 
+    override fun getCredentialWithCredentialId(
+        credentialId: String
+    ): ServerUserKey {
+        val uriComponentsBuilder = UriComponentsBuilder.fromUriString(CREDENTIALS_URI)
+        val uri = uriComponentsBuilder
+            .path(credentialId!!)
+            .queryParam("rpId", RP_ID)
+            .build().toUri()
+        val response = restTemplate.exchange(uri, HttpMethod.GET, null, GetCredentialResult::class.java)
+        return response.body!!.credential
+    }
 
     private fun createUserId(username: String): String {
         val digest = Digests.sha256(username.toByteArray(StandardCharsets.UTF_8))

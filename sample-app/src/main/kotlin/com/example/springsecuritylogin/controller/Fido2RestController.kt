@@ -61,7 +61,7 @@ class Fido2RestController(
     ): ServerPublicKeyCredentialGetOptionsResponse {
         return try {
             val user = SampleUtil.getLoginUser()
-            val (serverResponse, sessionId) = lineFido2ServerService.getAuthenticateOption(user!!.username)
+            val (serverResponse, sessionId) = lineFido2ServerService.getAuthenticateOption(user?.username)
             SampleUtil.setFido2SessionId(sessionId, httpServletResponse)
             serverResponse
         } catch (e: Exception) {

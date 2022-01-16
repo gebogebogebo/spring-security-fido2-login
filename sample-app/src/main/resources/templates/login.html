@@ -7,6 +7,7 @@
 <body>
 <div>
     <p style="text-align: left;">Sample Spring Security Login</p>
+    <hr>
     <div>
         <form method="post" th:action="@{/login}">
             <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
@@ -20,6 +21,7 @@
             <button class="btn" type="submit">login</button>
         </form>
     </div>
+    <hr>
     <div>
         <form name="authenticate" th:action="@{/login-fido2}" method="post">
             <p hidden>
@@ -27,7 +29,7 @@
             </p>
         </form>
         <div>
-            <button href="#" type="button" id="authenticatefido">login with FIDO Passwordless</button>
+            <button href="#" type="button" id="authenticatefido">Passwordless login</button>
         </div>
     </div>
 </div>

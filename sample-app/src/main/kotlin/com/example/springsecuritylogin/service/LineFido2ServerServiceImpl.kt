@@ -22,7 +22,7 @@ class LineFido2ServerServiceImpl(
 ) : LineFido2ServerService {
     companion object {
         private const val RP_ID = "localhost"
-        private const val RP_NAME = "test-rp"
+        private const val RP_NAME = "LINE-FIDO2-Server Spring-Security-Sample-App"
         private const val ORIGIN = "http://localhost:8080"
         private const val REG_CHALLENGE_URI = "http://localhost:8081/fido2/reg/challenge"
         private const val REG_RESPONSE_URI = "http://localhost:8081/fido2/reg/response"

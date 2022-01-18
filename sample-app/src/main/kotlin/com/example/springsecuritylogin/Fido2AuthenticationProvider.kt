@@ -41,9 +41,9 @@ class Fido2AuthenticationProvider(
             SimpleGrantedAuthority(SampleUtil.Role.USER.value)
         )
 
-        val principalNew = User(userName,"", authorities)
+        val authencatedPrincipal = User(userName,"", authorities)
 
-        var result = AssertionAuthenticationToken(principalNew, authentication.credentials, authorities)
+        var result = AssertionAuthenticationToken(authencatedPrincipal, authentication.credentials, authorities)
         result.isAuthenticated = true
         return result
     }

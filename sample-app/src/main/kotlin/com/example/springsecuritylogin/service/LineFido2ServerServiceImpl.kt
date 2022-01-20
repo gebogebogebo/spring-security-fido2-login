@@ -140,7 +140,6 @@ class LineFido2ServerServiceImpl(
         val request = HttpEntity(verifyCredential, HttpHeaders())
 
         return try {
-            // TODO パスワードレスのときは UV が true であること
             val response = restTemplate.postForObject(AUTH_RESPONSE_URI, request, VerifyCredentialResult::class.java)
             true
         } catch (e: Exception) {

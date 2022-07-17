@@ -12,30 +12,56 @@
     <hr>
     <div>
         <div>
+            <h3>2段階認証</h3>
             FIDO2ログイン登録<br>
             セキュリティキー(認証器)の種類を選択してください
         </div>
         <div>
             <div>
-                <input type="radio" name="attachment" id="attachmentPlatform" value="platform" checked>
-                <label for="attachmentPlatform">
+                <input type="radio" name="attachment2fa" id="attachment2faPlatform" value="platform" checked>
+                <label for="attachment2faPlatform">
                     タッチID などの いわゆる プラットフォーム認証器
                 </label>
             </div>
             <div>
-                <input type="radio" name="attachment" id="attachmentCrossPlatform" value="cross-platform">
-                <label for="attachmentCrossPlatform">
+                <input type="radio" name="attachment2fa" id="attachment2faCrossPlatform" value="cross-platform">
+                <label for="attachment2faCrossPlatform">
                     Yubikey などの いわゆる クロスプラットフォーム認証器
                 </label>
             </div>
         </div>
     </div>
-    <button href="#" type="button" id="register">Register</button>
-    <div id="status">
+    <button href="#" type="button" id="registe2fa">Register</button>
+    <div id="status2fa">
         ...
     </div>
     <hr>
-
+    <div>
+        <div>
+            <h3>パスワードレス認証</h3>
+            FIDO2ログイン登録<br>
+            セキュリティキー(認証器)の種類を選択してください
+        </div>
+        <div>
+            <div>
+                <input type="radio" name="attachmentPasswordless" id="attachmentPasswordlessPlatform" value="platform" checked>
+                <label for="attachmentPasswordlessPlatform">
+                    タッチID などの いわゆる プラットフォーム認証器
+                </label>
+            </div>
+            <div>
+                <input type="radio" name="attachmentPasswordless" id="attachmentPasswordlessCrossPlatform" value="cross-platform">
+                <label for="attachmentPasswordlessCrossPlatform">
+                    Yubikey などの いわゆる クロスプラットフォーム認証器
+                </label>
+            </div>
+        </div>
+    </div>
+    <button href="#" type="button" id="registePasswordless">Register</button>
+    <div id="statusPasswordless">
+        ...
+    </div>
+    <hr>
     <form th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>

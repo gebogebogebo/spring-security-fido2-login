@@ -42,7 +42,8 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .authorizeRequests()
             .antMatchers("/h2-console/**").permitAll()
-            .antMatchers("/login", "/login-fido2", "/authenticate/option").permitAll()
+            .antMatchers("/login", "/authenticate/option").permitAll()
+            .antMatchers("/login-fido2").hasAnyAuthority(SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value)
             .anyRequest().hasRole(SampleUtil.Role.USER.name)
 
         // Security Filter

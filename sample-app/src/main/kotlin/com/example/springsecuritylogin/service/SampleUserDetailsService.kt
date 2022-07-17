@@ -22,9 +22,15 @@ class SampleUserDetailsService(
 
         val mUser = mUserRepository.findById(userId).orElse(null) ?: throw UsernameNotFoundException("Not found userId")
 
-        val getCredentialsResult = lineFido2ServerService.getCredentialsWithUsername(userId)
+        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId).filter {
+            if (it.rk == null) {
+                true
+            } else {
+                !it.rk
+            }
+        }
 
-        val authorities = if (getCredentialsResult.credentials.isEmpty()) {
+        val authorities = if (credentials.isEmpty()) {
             listOf(
                 SimpleGrantedAuthority(SampleUtil.Auth.AUTHENTICATED_PASSWORD.value),
                 SimpleGrantedAuthority(SampleUtil.Role.USER.value)

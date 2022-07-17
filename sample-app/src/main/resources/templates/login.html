@@ -7,17 +7,35 @@
 <body>
 <div>
     <p style="text-align: left;">Sample Spring Security Login</p>
-    <form method="post" th:action="@{/login}">
-        <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
-        <div th:if="${showLogoutedMsg}" th:text="${logoutedMsg}"></div>
-        <p>
-            <input type="text" id="username" name="username" placeholder="username" required autofocus>
-        </p>
-        <p>
-            <input type="password" id="password" name="password" placeholder="passowrd" required>
-        </p>
-        <button class="btn" type="submit">login</button>
-    </form>
+    <hr>
+    <div>
+        <form method="post" th:action="@{/login}">
+            <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
+            <div th:if="${showLogoutedMsg}" th:text="${logoutedMsg}"></div>
+            <p>
+                <input type="text" id="username" name="username" placeholder="username" required autofocus>
+            </p>
+            <p>
+                <input type="password" id="password" name="password" placeholder="passowrd" required>
+            </p>
+            <button class="btn" type="submit">login</button>
+        </form>
+    </div>
+    <hr>
+    <div>
+        <form name="authenticate" th:action="@{/login-fido2}" method="post">
+            <p hidden>
+                <input type="text" id="assertion" name="assertion">
+            </p>
+        </form>
+        <div>
+            <button href="#" type="button" id="authenticatefido">Passwordless login</button>
+        </div>
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="js/index.js"></script>
+
 </body>
 </html>

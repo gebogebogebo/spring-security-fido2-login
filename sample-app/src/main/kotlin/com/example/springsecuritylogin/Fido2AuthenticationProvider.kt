@@ -1,5 +1,6 @@
 package com.example.springsecuritylogin
 
+import com.example.springsecuritylogin.repository.MuserRepository
 import com.example.springsecuritylogin.service.LineFido2ServerService
 import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.security.authentication.AuthenticationProvider
@@ -11,10 +12,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class Fido2AuthenticationProvider(
+    private val mUserRepository: MuserRepository,
     private val lineFido2ServerService: LineFido2ServerService,
 ) : AuthenticationProvider {
     override fun authenticate(authentication: Authentication): Authentication {
-        if (authentication is AssertionAuthenticationToken) {
+        val userName = if (authentication is AssertionAuthenticationToken) {
             // verify FIDO assertion
             if (!lineFido2ServerService.verifyAuthenticateAssertion(
                     authentication.credentials.sessionId,
@@ -23,6 +25,12 @@ class Fido2AuthenticationProvider(
             ) {
                 throw BadCredentialsException("Invalid Assertion")
             }
+            val credential = lineFido2ServerService.getCredentialWithCredentialId(authentication.credentials.assertion.id)
+
+            mUserRepository.findById(credential.name)
+                .orElse(null) ?: throw BadCredentialsException("Invalid Assertion")
+
+            credential.name
         } else {
             throw BadCredentialsException("Invalid Authentication")
         }
@@ -33,12 +41,9 @@ class Fido2AuthenticationProvider(
             SimpleGrantedAuthority(SampleUtil.Role.USER.value)
         )
 
-        val principalNew = User(
-            authentication.principal.username,
-            authentication.principal.password ?: "",
-            authorities)
+        val authencatedPrincipal = User(userName,"", authorities)
 
-        var result = AssertionAuthenticationToken(principalNew, authentication.credentials, authorities)
+        var result = AssertionAuthenticationToken(authencatedPrincipal, authentication.credentials, authorities)
         result.isAuthenticated = true
         return result
     }

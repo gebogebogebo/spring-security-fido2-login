@@ -4,12 +4,13 @@ import com.example.springsecuritylogin.controller.AdapterServerResponse
 import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialCreationOptionsResponse
 import com.example.springsecuritylogin.controller.ServerPublicKeyCredentialGetOptionsResponse
 import com.linecorp.line.auth.fido.fido2.common.AuthenticatorAttachment
-import com.linecorp.line.auth.fido.fido2.common.server.GetCredentialsResult
+import com.linecorp.line.auth.fido.fido2.common.server.ServerUserKey
 
 interface LineFido2ServerService {
     fun getRegisterOption(
         userName: String,
         authenticatorAttachment: AuthenticatorAttachment?,
+        requireResidentKey: Boolean,
     ): Pair<ServerPublicKeyCredentialCreationOptionsResponse, String>
 
     fun verifyRegisterAttestation(
@@ -18,7 +19,7 @@ interface LineFido2ServerService {
     ): AdapterServerResponse
 
     fun getAuthenticateOption(
-        userName: String,
+        userName: String?,
     ): Pair<ServerPublicKeyCredentialGetOptionsResponse, String>
 
     fun verifyAuthenticateAssertion(
@@ -28,5 +29,9 @@ interface LineFido2ServerService {
 
     fun getCredentialsWithUsername(
         username: String,
-    ): GetCredentialsResult
+    ): List<ServerUserKey>
+
+    fun getCredentialWithCredentialId(
+        credentialId: String,
+    ): ServerUserKey
 }

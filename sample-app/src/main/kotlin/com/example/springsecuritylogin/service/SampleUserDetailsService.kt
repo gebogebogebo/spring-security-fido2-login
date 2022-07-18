@@ -22,13 +22,15 @@ class SampleUserDetailsService(
 
         val mUser = mUserRepository.findById(userId).orElse(null) ?: throw UsernameNotFoundException("Not found userId")
 
-        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId).filter {
-            if (it.rk == null) {
-                true
-            } else {
-                !it.rk
-            }
-        }
+        // to passkey (auto rk)
+//        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId).filter {
+//            if (it.rk == null) {
+//                true
+//            } else {
+//                !it.rk
+//            }
+//        }
+        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId)
 
         val authorities = if (credentials.isEmpty()) {
             listOf(

@@ -201,6 +201,9 @@ function createCredential(options) {
                 attestation.response.transports = rawAttestation.response.getTransports();
             }
 
+            // to Safari(remove empty transports)
+            attestation.response.transports = attestation.response.transports.filter(item => item.length>0);
+
             console.log("=== Attestation response ===");
             logVariable("rawId (b64url)", attestation.rawId)
             logVariable("id (b64url)", attestation.id);

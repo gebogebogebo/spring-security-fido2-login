@@ -259,6 +259,15 @@ function getAssertion(options) {
         return Promise.reject("WebAuthn APIs are not available on this user agent.");
     }
 
+    // To Safari Passkey
+    if(!PublicKeyCredential.isConditionalMediationAvailable ||
+       !PublicKeyCredential.isConditionalMediationAvailable()) {
+       // Browser doesn't support AutoFill-assisted requests.
+    } else {
+        options.userVerification = "preferred";
+        options["mediation"] = "conditional";
+    }
+
     return navigator.credentials.get({publicKey: options, signal: abortSignal})
         .then(rawAssertion => {
             logObject("raw assertion", rawAssertion);

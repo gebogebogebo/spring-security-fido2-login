@@ -67,7 +67,6 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
     private fun createPasswordAuthenticationFilter(): PasswordAuthenticationFilter {
         return PasswordAuthenticationFilter("/password", "POST").also {
             it.setAuthenticationManager(authenticationManagerBean())
-            it.setAuthenticationSuccessHandler(SimpleUrlAuthenticationSuccessHandler("/mypage"))
             it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
         }
     }

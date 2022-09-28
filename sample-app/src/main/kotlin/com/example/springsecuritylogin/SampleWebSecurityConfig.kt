@@ -4,7 +4,6 @@ import com.example.springsecuritylogin.service.SampleUserDetailsService
 import com.example.springsecuritylogin.util.SampleUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
@@ -18,7 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
-    private lateinit var fido2AuthenticationProvider: Fido2AuthenticationProvider
+    private lateinit var usernameAuthenticationProvider: UsernameAuthenticationProvider
+
+    @Autowired
+    private lateinit var passwordAuthenticationProvider: PasswordAuthenticationProvider
 
     @Autowired
     private lateinit var userDetailsService: SampleUserDetailsService
@@ -26,12 +28,13 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(
         auth: AuthenticationManagerBuilder,
     ) {
-        // Authentication Provider
-        val daoAuthenticationProvider = DaoAuthenticationProvider().also {
-            it.setUserDetailsService(userDetailsService)
-        }
-        auth.authenticationProvider(daoAuthenticationProvider)
-        auth.authenticationProvider(fido2AuthenticationProvider)
+        // setUserDetailsService
+        usernameAuthenticationProvider.setUserDetailsService(userDetailsService)
+        passwordAuthenticationProvider.setUserDetailsService(userDetailsService)
+
+        // authenticationProvider
+        auth.authenticationProvider(usernameAuthenticationProvider)
+        auth.authenticationProvider(passwordAuthenticationProvider)
     }
 
     override fun configure(web: WebSecurity) {
@@ -42,30 +45,31 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .authorizeRequests()
             .antMatchers("/h2-console/**").permitAll()
-            .antMatchers("/login", "/authenticate/option").permitAll()
-            .antMatchers("/login-fido2").hasAnyAuthority(SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value)
+            .antMatchers("/login").permitAll()
+            .antMatchers("/password").hasAnyAuthority(SampleUtil.Auth.AUTHENTICATED_USERNAME.value)
             .anyRequest().hasRole(SampleUtil.Role.USER.name)
 
         // Security Filter
         http
             .formLogin()
             .loginPage("/login").permitAll()
-            .successHandler(UsernamePasswordAuthenticationSuccessHandler("/login-fido2","/mypage"))
+            .successHandler(UsernameAuthenticationSuccessHandler("/password", "/mypage"))
             .failureUrl("/login?error")
 
         http
-            .addFilterAt(createFido2AuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAt(createPasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
         // for h2db debug
         http.csrf().disable()
         http.headers().frameOptions().disable()
     }
 
-    private fun createFido2AuthenticationFilter(): Fido2AuthenticationFilter {
-        return Fido2AuthenticationFilter("/login-fido2", "POST").also {
+    private fun createPasswordAuthenticationFilter(): PasswordAuthenticationFilter {
+        return PasswordAuthenticationFilter("/password", "POST").also {
             it.setAuthenticationManager(authenticationManagerBean())
             it.setAuthenticationSuccessHandler(SimpleUrlAuthenticationSuccessHandler("/mypage"))
             it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
         }
     }
+
 }

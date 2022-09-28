@@ -41,9 +41,11 @@ class LoginController {
         return "login"
     }
 
-    @GetMapping("login-fido2")
-    fun loginFido2(): String {
-        return "login-fido2"
+    @GetMapping("password")
+    fun loginPassowrd(model: Model): String {
+        val user = SampleUtil.getLoginUser()
+        model.addAttribute("username", user?.username)
+        return "password"
     }
 
     @GetMapping("mypage")
@@ -52,7 +54,7 @@ class LoginController {
         model: Model,
     ): String {
         val user = SampleUtil.getLoginUser()
-        model.addAttribute("userName", user?.username)
+        model.addAttribute("username", user?.username)
         return "mypage"
     }
 }

@@ -13,34 +13,21 @@ import org.springframework.stereotype.Service
 @Service
 class SampleUserDetailsService(
     private val mUserRepository: MuserRepository,
-    private val lineFido2ServerService: LineFido2ServerService,
 ) : UserDetailsService {
     override fun loadUserByUsername(userId: String?): UserDetails {
-        if (userId == null || userId.isEmpty()) {
+        if (userId.isNullOrEmpty()) {
             throw UsernameNotFoundException("userId is null or empty")
         }
 
         val mUser = mUserRepository.findById(userId).orElse(null) ?: throw UsernameNotFoundException("Not found userId")
 
-        // to passkey (auto rk)
-//        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId).filter {
-//            if (it.rk == null) {
-//                true
-//            } else {
-//                !it.rk
-//            }
-//        }
-        val credentials = lineFido2ServerService.getCredentialsWithUsername(userId)
-
-        val authorities = if (credentials.isEmpty()) {
+        val authorities = if (SampleUtil.isUsernameAuthenticated()) {
             listOf(
                 SimpleGrantedAuthority(SampleUtil.Auth.AUTHENTICATED_PASSWORD.value),
                 SimpleGrantedAuthority(SampleUtil.Role.USER.value)
             )
         } else {
-            listOf(
-                SimpleGrantedAuthority(SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value)
-            )
+            listOf(SimpleGrantedAuthority(SampleUtil.Auth.AUTHENTICATED_USERNAME.value))
         }
 
         return User(mUser.id, mUser.password, authorities)

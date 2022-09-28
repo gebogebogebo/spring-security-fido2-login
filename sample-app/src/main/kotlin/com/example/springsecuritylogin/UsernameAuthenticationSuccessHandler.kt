@@ -6,7 +6,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class UsernamePasswordAuthenticationSuccessHandler(
+class UsernameAuthenticationSuccessHandler(
     private val nextAuthUrl: String,
     defaultTargetUrl: String
 ) : SimpleUrlAuthenticationSuccessHandler(defaultTargetUrl) {
@@ -15,11 +15,7 @@ class UsernamePasswordAuthenticationSuccessHandler(
         response: HttpServletResponse?,
         authentication: Authentication
     ) {
-        val needFido = authentication.authorities?.any {
-            it.authority == SampleUtil.Auth.PRE_AUTHENTICATE_FIDO.value
-        } ?: false
-
-        if (needFido) {
+        if (SampleUtil.isUsernameAuthenticated()) {
             response?.sendRedirect(nextAuthUrl)
         } else {
             super.onAuthenticationSuccess(request, response, authentication)

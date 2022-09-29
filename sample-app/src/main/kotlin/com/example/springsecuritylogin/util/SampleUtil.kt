@@ -11,6 +11,7 @@ class SampleUtil {
     enum class Auth(val value: String) {
         AUTHENTICATED_USERNAME("authenticated-username"),
         AUTHENTICATED_PASSWORD("authenticated-password"),
+        AUTHENTICATED_FIDO("authenticated-fido"),
     }
 
     enum class Role(val value: String) {

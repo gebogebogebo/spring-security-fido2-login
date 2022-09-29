@@ -1,6 +1,6 @@
 $(window).on('load', function () {
     $("#registePasswordless").on('click', () => registerPasswordlessButtonClicked());
-    // $("#authenticatefido").on('click', () => authenticateFido());
+    $("#authenticatefido").on('click', () => authenticateFido());
 });
 
 const abortController = new AbortController();
@@ -30,6 +30,17 @@ function registerPasswordlessButtonClicked() {
 /**
  * Authenticate
  */
+function authenticateFidoWithConditional() {
+    if(PublicKeyCredential.isConditionalMediationAvailable &&
+        PublicKeyCredential.isConditionalMediationAvailable()) {
+        authenticateFido();
+    } else {
+        $("#authenticatefido").show();
+        alert('Browser doesn\'t support Conditional UI.')
+        return;
+    }
+}
+
 function authenticateFido() {
     getAuthChallenge()
         .then(getCredentialOptions => {
@@ -247,9 +258,6 @@ function getAssertion(options) {
     if(PublicKeyCredential.isConditionalMediationAvailable &&
        PublicKeyCredential.isConditionalMediationAvailable()) {
         publicKeyCredentialRequestOptions.mediation = "conditional";
-    } else {
-        alert('Browser doesn\'t support Conditional UI.')
-        return;
     }
 
     return navigator.credentials.get(publicKeyCredentialRequestOptions)

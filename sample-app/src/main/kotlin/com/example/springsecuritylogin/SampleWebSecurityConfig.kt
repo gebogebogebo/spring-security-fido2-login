@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 
@@ -21,6 +20,9 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
     private lateinit var passwordAuthenticationProvider: PasswordAuthenticationProvider
+
+    @Autowired
+    private lateinit var fido2AuthenticationProvider: Fido2AuthenticationProvider
 
     @Autowired
     private lateinit var userDetailsService: SampleUserDetailsService
@@ -35,6 +37,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         // authenticationProvider
         auth.authenticationProvider(usernameAuthenticationProvider)
         auth.authenticationProvider(passwordAuthenticationProvider)
+        auth.authenticationProvider(fido2AuthenticationProvider)
     }
 
     override fun configure(web: WebSecurity) {
@@ -58,6 +61,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
 
         http
             .addFilterAt(createPasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAt(createFido2AuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
         // for h2db debug
         http.csrf().disable()
@@ -71,4 +75,10 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         }
     }
 
+    private fun createFido2AuthenticationFilter(): Fido2AuthenticationFilter {
+        return Fido2AuthenticationFilter("/login-fido2", "POST").also {
+            it.setAuthenticationManager(authenticationManagerBean())
+            it.setAuthenticationFailureHandler(SimpleUrlAuthenticationFailureHandler("/login?error"))
+        }
+    }
 }

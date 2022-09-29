@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>Login</title>
 </head>
-<body>
+<body onload="authenticateFido();">
+<!--<body>-->
 <div>
     <p style="text-align: left;">Sample Spring Security Login</p>
     <hr>
@@ -13,14 +14,19 @@
             <div th:if="${showErrorMsg}" th:text="${errorMsg}"></div>
             <div th:if="${showLogoutedMsg}" th:text="${logoutedMsg}"></div>
             <p>
-                <input type="text" id="username" name="username" autocomplete="username" placeholder="username" required autofocus>
+                <input type="text" id="username" name="username" autocomplete="username webauthn" placeholder="username" required autofocus>
             </p>
             <button class="btn" type="submit">next</button>
         </form>
     </div>
+
+    <hr>
+    <button href="#" type="button" id="authenticatefido">Passwordless login</button>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="js/index.js"></script>
 
 </body>
 </html>

@@ -192,11 +192,9 @@ function createCredential(options) {
                 attestation.response.transports = rawAttestation.response.getTransports();
             }
 
-            // to Safari(remove empty transports)
-            attestation.response.transports = attestation.response.transports.filter(item => item.length>0);
-
             // hybridはline-fido2-serverに対応していないので削除する
             attestation.response.transports = attestation.response.transports.filter(item => item !== "hybrid");
+            attestation.response.transports = attestation.response.transports.filter(item => item.length>0);
 
             console.log("=== Attestation response ===");
             logVariable("rawId (b64url)", attestation.rawId)

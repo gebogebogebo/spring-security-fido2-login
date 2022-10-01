@@ -35,8 +35,9 @@ function authenticateFidoWithConditional() {
         PublicKeyCredential.isConditionalMediationAvailable()) {
         authenticateFido();
     } else {
-        $("#authenticatefido").show();
-        alert('Browser doesn\'t support Conditional UI.')
+        $("#conditionalUIArea").hide();
+        $("#modalUiArea").show();
+        $("#authenticatefidoStatus").text("Browser doesn\'t support Conditional UI.");
         return;
     }
 }

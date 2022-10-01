@@ -48,7 +48,7 @@ class SampleWebSecurityConfig : WebSecurityConfigurerAdapter() {
         http
             .authorizeRequests()
             .antMatchers("/h2-console/**").permitAll()
-            .antMatchers("/login", "/authenticate/option").permitAll()
+            .antMatchers("/login", "/login-fido2", "/authenticate/option").permitAll()
             .antMatchers("/password").hasAnyAuthority(SampleUtil.Auth.AUTHENTICATED_USERNAME.value)
             .anyRequest().hasRole(SampleUtil.Role.USER.name)
 

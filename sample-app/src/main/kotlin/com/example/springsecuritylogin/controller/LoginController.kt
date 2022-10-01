@@ -17,6 +17,11 @@ class LoginController {
         return "redirect:mypage"
     }
 
+    @GetMapping("login-fido2")
+    fun loginFido2(): String {
+        return "login-fido2"
+    }
+
     @GetMapping("login")
     fun login(
         @RequestParam(value = "error", required = false) error: String?,

@@ -253,7 +253,7 @@ function getAssertion(options) {
         signal: abortSignal,
     };
 
-    // To Safari Passkey
+    // Level3 Conditional UI
     if(PublicKeyCredential.isConditionalMediationAvailable &&
        PublicKeyCredential.isConditionalMediationAvailable()) {
         publicKeyCredentialRequestOptions.mediation = "conditional";
